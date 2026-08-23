@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { supabase } from "@/lib/supabase";
 
-const resend = new Resend("PASTE_YOUR_RESEND_API_KEY_HERE");
+const resend = new Resend("re_dCug56GS_AFELAXLXRhgp2ZW9SV8ko6uv");
 
 export async function POST(req: Request) {
   try {
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     // 2. Dispatch Email via Resend
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: "FairDerma <onboarding@resend.dev>",
-      to: ["growmyself369@gmail.com"], // Must be your exact Resend account email
+      to: ["chandansharma3166@gmail.com"], // Must be your exact Resend account email
       subject: `New Appointment Booking: ${name}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 24px; color: #111; background-color: #f9f9f9;">
