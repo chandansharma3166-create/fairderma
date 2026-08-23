@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Clock, CheckCircle, Sparkles, User, Mail, Phone, Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { Calendar, Clock, CheckCircle, Sparkles, User, Mail, Phone, Loader2, MessageSquare } from "lucide-react";
 
 export default function ConsultationForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [whatsappUrl, setWhatsappUrl] = useState<string>("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -25,20 +25,20 @@ export default function ConsultationForm() {
     setErrorMsg(null);
 
     try {
-      const { error } = await supabase.from("consultations").insert([
-        {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          physician: formData.physician,
-          treatment: formData.treatment,
-          preferred_date: formData.preferredDate,
-          preferred_time: formData.preferredTime,
-        },
-      ]);
+      const res = await fetch("/api/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-      if (error) {
-        throw error;
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to submit consultation request.");
+      }
+
+      if (data.whatsappUrl) {
+        setWhatsappUrl(data.whatsappUrl);
       }
 
       setSubmitted(true);
@@ -86,7 +86,7 @@ export default function ConsultationForm() {
         {/* Right Column Form / Success Window */}
         <div className="lg:col-span-7 bg-[#16161A] border border-white/10 p-8 sm:p-10 relative">
           {submitted ? (
-            <div className="py-12 text-center space-y-5">
+            <div className="py-10 text-center space-y-5">
               <div className="w-14 h-14 bg-[#0D0D0F] border border-[#C5A880] text-[#C5A880] rounded-full mx-auto flex items-center justify-center">
                 <CheckCircle className="w-8 h-8" />
               </div>
@@ -94,14 +94,31 @@ export default function ConsultationForm() {
                 Request Dispatched
               </h3>
               <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
-                Thank you, <span className="text-[#C5A880] font-bold">{formData.name}</span>. Our clinical concierge team has reserved your triage slot with <span className="text-white">{formData.physician}</span>. We will call you within 2 business hours.
+                Thank you, <span className="text-[#C5A880] font-bold">{formData.name}</span>. An email notification has been dispatched, and your slot is reserved with <span className="text-white">{formData.physician}</span>.
               </p>
-              <button
-                onClick={() => setSubmitted(false)}
-                className="mt-4 px-6 py-2.5 bg-white/5 border border-white/10 text-xs uppercase font-mono text-[#C5A880] hover:bg-white/10 transition-colors"
-              >
-                Submit Another Request
-              </button>
+
+              {whatsappUrl && (
+                <div className="pt-2">
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#25D366] text-black font-bold text-xs uppercase tracking-wider rounded hover:bg-[#20bd5a] transition-all shadow-lg"
+                  >
+                    <MessageSquare className="w-4 h-4 fill-black" />
+                    Open Instant WhatsApp Confirmation
+                  </a>
+                </div>
+              )}
+
+              <div>
+                <button
+                  onClick={() => setSubmitted(false)}
+                  className="mt-4 px-6 py-2.5 bg-white/5 border border-white/10 text-xs uppercase font-mono text-[#C5A880] hover:bg-white/10 transition-colors"
+                >
+                  Submit Another Request
+                </button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -227,7 +244,7 @@ export default function ConsultationForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 bg-[#C5A880] text-black font-bold text-xs uppercase tracking-widest hover:bg-[#b39369] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-4 bg-[#C5A880] text-black font-bold text-xs uppercase tracking-widest hover:bg-[#b39369] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? (
                   <>
