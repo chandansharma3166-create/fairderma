@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Clock, CheckCircle, Sparkles, User, Mail, Phone } from "lucide-react";
+import { Calendar, Clock, CheckCircle, Sparkles, User, Mail, Phone, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export default function ConsultationForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,9 +19,34 @@ export default function ConsultationForm() {
     preferredTime: "Morning (09:00 - 13:00)",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const { error } = await supabase.from("consultations").insert([
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          physician: formData.physician,
+          treatment: formData.treatment,
+          preferred_date: formData.preferredDate,
+          preferred_time: formData.preferredTime,
+        },
+      ]);
+
+      if (error) {
+        throw error;
+      }
+
+      setSubmitted(true);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to submit consultation request. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,6 +105,12 @@ export default function ConsultationForm() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
+              {errorMsg && (
+                <div className="p-3 bg-red-950/50 border border-red-500/50 text-red-300 text-xs font-mono">
+                  {errorMsg}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Full Name */}
                 <div className="space-y-1.5">
@@ -191,9 +226,17 @@ export default function ConsultationForm() {
 
               <button
                 type="submit"
-                className="w-full py-4 bg-[#C5A880] text-black font-bold text-xs uppercase tracking-widest hover:bg-[#b39369] transition-all"
+                disabled={loading}
+                className="w-full py-4 bg-[#C5A880] text-black font-bold text-xs uppercase tracking-widest hover:bg-[#b39369] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                Confirm Appointment Triage
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Processing Reservation...</span>
+                  </>
+                ) : (
+                  <span>Confirm Appointment Triage</span>
+                )}
               </button>
             </form>
           )}
