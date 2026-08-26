@@ -5,7 +5,6 @@ import { supabase } from "@/lib/supabase";
 import { 
   Calendar, 
   Clock, 
-  User, 
   Phone, 
   Mail, 
   Stethoscope, 
@@ -13,7 +12,9 @@ import {
   XCircle, 
   AlertCircle,
   RefreshCw,
-  Search
+  Search,
+  Lock,
+  LogOut
 } from "lucide-react";
 
 interface Consultation {
@@ -29,12 +30,47 @@ interface Consultation {
   status: "confirmed" | "completed" | "cancelled" | "pending";
 }
 
+// CHANGE YOUR ADMIN CREDENTIALS HERE
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "FairDermaSecret2026!"; 
+
 export default function AdminDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [usernameInput, setUsernameInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [loginError, setLoginError] = useState("");
+
   const [consultations, setConsultations] = useState<Consultation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
+
+  // Check login session on load
+  useEffect(() => {
+    const savedAuth = localStorage.getItem("fairderma_admin_auth");
+    if (savedAuth === "true") {
+      setIsAuthenticated(true);
+      fetchConsultations();
+    }
+  }, []);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (usernameInput === ADMIN_USERNAME && passwordInput === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      localStorage.setItem("fairderma_admin_auth", "true");
+      setLoginError("");
+      fetchConsultations();
+    } else {
+      setLoginError("Invalid username or password.");
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem("fairderma_admin_auth");
+  };
 
   const fetchConsultations = async () => {
     setLoading(true);
@@ -51,24 +87,26 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchConsultations();
-  }, []);
-
   const updateStatus = async (id: string, newStatus: Consultation["status"]) => {
     setStatusUpdating(id);
+
+    // Optimistically update local state
+    setConsultations((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
+    );
+
     const { error } = await supabase
       .from("consultations")
       .update({ status: newStatus })
       .eq("id", id);
 
     if (error) {
-      alert("Failed to update status: " + error.message);
-    } else {
-      setConsultations((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
-      );
+      console.error("Supabase Update Error:", error);
+      alert("Failed to update status in database. Check Supabase RLS policies: " + error.message);
+      // Revert if database write failed
+      fetchConsultations();
     }
+
     setStatusUpdating(null);
   };
 
@@ -96,6 +134,63 @@ export default function AdminDashboard() {
     }
   };
 
+  // ---------------- LOGIN SCREEN ----------------
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0d0f12] flex items-center justify-center p-6 text-white">
+        <div className="w-full max-w-md bg-[#16161A] border border-white/10 p-8 rounded-xl shadow-2xl space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-12 h-12 bg-white/5 border border-[#C5A880]/30 rounded-full flex items-center justify-center mx-auto text-[#C5A880]">
+              <Lock className="w-5 h-5" />
+            </div>
+            <h1 className="text-2xl font-light tracking-wide uppercase">Clinical Portal</h1>
+            <p className="text-xs text-neutral-400 font-mono">Restricted access — Authorized staff only</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            {loginError && (
+              <div className="p-3 bg-red-950/50 border border-red-500/50 text-red-300 text-xs font-mono rounded text-center">
+                {loginError}
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <label className="text-[11px] uppercase font-mono text-neutral-400">Username</label>
+              <input
+                type="text"
+                required
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder="admin"
+                className="w-full bg-[#0D0D0F] border border-white/10 px-4 py-3 text-xs text-white placeholder-neutral-600 focus:border-[#C5A880] outline-none rounded"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[11px] uppercase font-mono text-neutral-400">Password</label>
+              <input
+                type="password"
+                required
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full bg-[#0D0D0F] border border-white/10 px-4 py-3 text-xs text-white placeholder-neutral-600 focus:border-[#C5A880] outline-none rounded"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 bg-[#C5A880] text-black font-bold text-xs uppercase tracking-widest hover:bg-[#b39369] transition-all rounded"
+            >
+              Authenticate Portal
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------------- DASHBOARD CONTENT ----------------
   return (
     <div className="min-h-screen bg-[#0d0f12] text-[#e1e4ea] p-6 lg:p-12">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -106,14 +201,23 @@ export default function AdminDashboard() {
             <span className="text-xs uppercase tracking-widest text-[#C5A880] font-mono">Clinical Management</span>
             <h1 className="text-3xl font-light text-white tracking-tight mt-1">Consultation Dashboard</h1>
           </div>
-          <button
-            onClick={fetchConsultations}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm transition-all self-start md:self-auto"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchConsultations}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm transition-all"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-300 rounded-lg text-sm transition-all"
+            >
+              <LogOut className="w-4 h-4" />
+              Exit
+            </button>
+          </div>
         </div>
 
         {/* Stats Row */}
@@ -155,7 +259,7 @@ export default function AdminDashboard() {
             />
           </div>
 
-          <div className="flex items-center gap-1 bg-white/[0.03] p-1 border border-white/10 rounded-lg self-start md:self-auto overflow-x-auto">
+          <div className="flex items-center gap-1 bg-white/[0.03] p-1 border border-white/10 rounded-lg overflow-x-auto">
             {["all", "confirmed", "completed", "cancelled"].map((tab) => (
               <button
                 key={tab}
@@ -172,7 +276,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Bookings Table / List */}
+        {/* Bookings Table */}
         <div className="bg-white/[0.02] border border-white/10 rounded-xl overflow-hidden">
           {loading ? (
             <div className="p-12 text-center text-neutral-500 text-sm">Loading consultations...</div>
@@ -193,8 +297,6 @@ export default function AdminDashboard() {
                 <tbody className="divide-y divide-white/5 font-light">
                   {filteredConsultations.map((item) => (
                     <tr key={item.id} className="hover:bg-white/[0.015] transition-colors">
-                      
-                      {/* Patient Info */}
                       <td className="py-4 px-6">
                         <div className="font-normal text-white">{item.name}</div>
                         <div className="flex items-center gap-2 text-xs text-neutral-400 mt-1">
@@ -207,7 +309,6 @@ export default function AdminDashboard() {
                         </div>
                       </td>
 
-                      {/* Treatment & Physician */}
                       <td className="py-4 px-6">
                         <div className="text-white">{item.treatment || "General Triage"}</div>
                         <div className="flex items-center gap-1.5 text-xs text-[#C5A880] mt-1">
@@ -216,7 +317,6 @@ export default function AdminDashboard() {
                         </div>
                       </td>
 
-                      {/* Date & Time */}
                       <td className="py-4 px-6 whitespace-nowrap">
                         <div className="flex items-center gap-1.5 text-white">
                           <Calendar className="w-3.5 h-3.5 text-neutral-400" />
@@ -228,19 +328,17 @@ export default function AdminDashboard() {
                         </div>
                       </td>
 
-                      {/* Status */}
                       <td className="py-4 px-6 whitespace-nowrap">
                         {getStatusBadge(item.status)}
                       </td>
 
-                      {/* Action Dropdown / Buttons */}
                       <td className="py-4 px-6 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">
                           {item.status !== "completed" && (
                             <button
                               disabled={statusUpdating === item.id}
                               onClick={() => updateStatus(item.id, "completed")}
-                              className="p-1.5 bg-blue-950/40 hover:bg-blue-900/60 border border-blue-800/40 text-blue-400 rounded-md transition-colors"
+                              className="p-1.5 bg-blue-950/40 hover:bg-blue-900/60 border border-blue-800/40 text-blue-400 rounded-md transition-colors cursor-pointer"
                               title="Mark as Completed"
                             >
                               <CheckCircle2 className="w-4 h-4" />
@@ -250,7 +348,7 @@ export default function AdminDashboard() {
                             <button
                               disabled={statusUpdating === item.id}
                               onClick={() => updateStatus(item.id, "cancelled")}
-                              className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-400 rounded-md transition-colors"
+                              className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-400 rounded-md transition-colors cursor-pointer"
                               title="Mark as Cancelled"
                             >
                               <XCircle className="w-4 h-4" />
@@ -260,7 +358,7 @@ export default function AdminDashboard() {
                             <button
                               disabled={statusUpdating === item.id}
                               onClick={() => updateStatus(item.id, "confirmed")}
-                              className="p-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/40 text-emerald-400 rounded-md transition-colors"
+                              className="p-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/40 text-emerald-400 rounded-md transition-colors cursor-pointer"
                               title="Reconfirm"
                             >
                               <AlertCircle className="w-4 h-4" />
@@ -268,7 +366,6 @@ export default function AdminDashboard() {
                           )}
                         </div>
                       </td>
-
                     </tr>
                   ))}
                 </tbody>
