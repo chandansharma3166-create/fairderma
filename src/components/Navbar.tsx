@@ -20,7 +20,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Links */}
+        {/* Desktop Links (Treatments & Consultation only) */}
         <nav className="hidden md:flex items-center gap-8">
           <Link
             href="/#services"
@@ -36,7 +36,7 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        {/* Desktop Buttons */}
+        {/* Desktop Buttons (Catalog & Book Visit only) */}
         <div className="hidden md:flex items-center gap-4">
           <Link
             href="/services"
@@ -88,7 +88,7 @@ export default function Navbar() {
             className="flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 text-[#C5A880] text-xs font-bold uppercase tracking-wider rounded mt-1"
           >
             <Stethoscope className="w-4 h-4" />
-            <span>View Catalog</span>
+            <span>Catalog</span>
           </Link>
           <a
             href="/#consultation"
