@@ -1,19 +1,19 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Navbar from "./components/Navbar";
-import BeforeAfterSlider from "./components/BeforeAfterSlider";
-import SkinAnalysisQuiz from "./components/SkinAnalysisQuiz";
-import TreatmentExplorer from "./components/TreatmentExplorer";
-import PhysicianTeam from "./components/PhysicianTeam";
-import ClinicalMetrics from "./components/ClinicalMetrics";
-import FaqSection from "./components/FaqSection";
-import ConsultationForm from "./components/ConsultationForm";
-import FloatingBookingBtn from "./components/FloatingBookingBtn";
-import Footer from "./components/Footer";
+import Navbar from "@/components/Navbar";
+import BeforeAfterSlider from "@/components/BeforeAfterSlider";
+import SkinAnalysisQuiz from "@/components/SkinAnalysisQuiz";
+import TreatmentExplorer from "@/components/TreatmentExplorer";
+import PhysicianTeam from "@/components/PhysicianTeam";
+import ClinicalMetrics from "@/components/ClinicalMetrics";
+import FaqSection from "@/components/FaqSection";
+import ConsultationForm from "@/components/ConsultationForm";
+import FloatingBookingBtn from "@/components/FloatingBookingBtn";
+import Footer from "@/components/Footer";
 import { ArrowRight, Sparkles } from "lucide-react";
 
-const DermalCanvas = dynamic(() => import("./components/3d/DermalCanvas"), {
+const DermalCanvas = dynamic(() => import("@/components/3d/DermalCanvas"), {
   ssr: false,
 });
 
