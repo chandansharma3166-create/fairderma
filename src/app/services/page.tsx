@@ -24,8 +24,6 @@ export default async function ServiceDetailPage({
   return (
     <main className="min-h-screen bg-[#0d0f12] text-white py-12 px-6 lg:px-16">
       <div className="max-w-4xl mx-auto space-y-12">
-        
-        {/* Navigation */}
         <Link
           href="/services"
           className="inline-flex items-center gap-2 text-xs font-mono uppercase text-neutral-400 hover:text-[#C5A880] transition-colors"
@@ -33,7 +31,6 @@ export default async function ServiceDetailPage({
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Clinical Menu
         </Link>
 
-        {/* Hero Section */}
         <div className="space-y-4 border-b border-white/10 pb-8">
           <span className="text-xs font-mono text-[#C5A880] uppercase tracking-widest">
             {treatment.category}
@@ -57,7 +54,6 @@ export default async function ServiceDetailPage({
           </div>
         </div>
 
-        {/* Benefits & Indications */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-[#16161A] p-6 rounded-xl border border-white/10 space-y-4">
             <h3 className="text-sm font-mono uppercase tracking-wider text-[#C5A880]">
@@ -88,7 +84,6 @@ export default async function ServiceDetailPage({
           </div>
         </div>
 
-        {/* Protocol Steps */}
         <div className="space-y-6">
           <h3 className="text-sm font-mono uppercase tracking-wider text-[#C5A880]">
             Clinical Workflow Protocol
@@ -106,7 +101,6 @@ export default async function ServiceDetailPage({
           </div>
         </div>
 
-        {/* Booking CTA */}
         <div className="p-8 rounded-2xl bg-[#C5A880] text-black flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
             <h3 className="text-xl font-bold">Ready for a Clinical Consultation?</h3>
@@ -121,7 +115,6 @@ export default async function ServiceDetailPage({
             <Calendar className="w-4 h-4" /> Book Appointment
           </Link>
         </div>
-
       </div>
     </main>
   );
