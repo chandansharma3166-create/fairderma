@@ -30,12 +30,13 @@ interface Consultation {
   status: "confirmed" | "completed" | "cancelled" | "pending";
 }
 
-// CHANGE YOUR ADMIN CREDENTIALS HERE
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "FairDermaSecret2026!"; 
 
 export default function AdminDashboard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
+
   const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -46,20 +47,21 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
 
-  // Check login session on load
+  // Check login state on load
   useEffect(() => {
-    const savedAuth = localStorage.getItem("fairderma_admin_auth");
+    const savedAuth = sessionStorage.getItem("fairderma_admin_auth");
     if (savedAuth === "true") {
       setIsAuthenticated(true);
       fetchConsultations();
     }
+    setIsCheckingAuth(false);
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (usernameInput === ADMIN_USERNAME && passwordInput === ADMIN_PASSWORD) {
+    if (usernameInput.trim() === ADMIN_USERNAME && passwordInput === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
-      localStorage.setItem("fairderma_admin_auth", "true");
+      sessionStorage.setItem("fairderma_admin_auth", "true");
       setLoginError("");
       fetchConsultations();
     } else {
@@ -69,7 +71,9 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    localStorage.removeItem("fairderma_admin_auth");
+    sessionStorage.removeItem("fairderma_admin_auth");
+    setUsernameInput("");
+    setPasswordInput("");
   };
 
   const fetchConsultations = async () => {
@@ -81,6 +85,7 @@ export default function AdminDashboard() {
 
     if (error) {
       console.error("Error fetching consultations:", error);
+      alert("Error fetching data: " + error.message);
     } else {
       setConsultations(data || []);
     }
@@ -90,7 +95,7 @@ export default function AdminDashboard() {
   const updateStatus = async (id: string, newStatus: Consultation["status"]) => {
     setStatusUpdating(id);
 
-    // Optimistically update local state
+    // Optimistically update UI
     setConsultations((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
     );
@@ -101,9 +106,9 @@ export default function AdminDashboard() {
       .eq("id", id);
 
     if (error) {
-      console.error("Supabase Update Error:", error);
-      alert("Failed to update status in database. Check Supabase RLS policies: " + error.message);
-      // Revert if database write failed
+      console.error("Supabase Status Update Error:", error);
+      alert("Database error: Could not update status. Please make sure Supabase RLS is configured to allow UPDATEs.\n\nError details: " + error.message);
+      // Revert change from database on failure
       fetchConsultations();
     }
 
@@ -134,7 +139,15 @@ export default function AdminDashboard() {
     }
   };
 
-  // ---------------- LOGIN SCREEN ----------------
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-[#0d0f12] flex items-center justify-center text-neutral-500 text-sm">
+        Loading portal...
+      </div>
+    );
+  }
+
+  // ---------------- 1. LOGIN SCREEN ----------------
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#0d0f12] flex items-center justify-center p-6 text-white">
@@ -144,7 +157,7 @@ export default function AdminDashboard() {
               <Lock className="w-5 h-5" />
             </div>
             <h1 className="text-2xl font-light tracking-wide uppercase">Clinical Portal</h1>
-            <p className="text-xs text-neutral-400 font-mono">Restricted access — Authorized staff only</p>
+            <p className="text-xs text-neutral-400 font-mono">Restricted Access — Admin Portal</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -180,7 +193,7 @@ export default function AdminDashboard() {
 
             <button
               type="submit"
-              className="w-full py-3.5 bg-[#C5A880] text-black font-bold text-xs uppercase tracking-widest hover:bg-[#b39369] transition-all rounded"
+              className="w-full py-3.5 bg-[#C5A880] text-black font-bold text-xs uppercase tracking-widest hover:bg-[#b39369] transition-all rounded cursor-pointer"
             >
               Authenticate Portal
             </button>
@@ -190,7 +203,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // ---------------- DASHBOARD CONTENT ----------------
+  // ---------------- 2. DASHBOARD VIEW ----------------
   return (
     <div className="min-h-screen bg-[#0d0f12] text-[#e1e4ea] p-6 lg:p-12">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -205,14 +218,14 @@ export default function AdminDashboard() {
             <button
               onClick={fetchConsultations}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm transition-all cursor-pointer"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-300 rounded-lg text-sm transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/40 text-rose-300 rounded-lg text-sm transition-all cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               Exit
@@ -252,7 +265,7 @@ export default function AdminDashboard() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
             <input
               type="text"
-              placeholder="Search by patient, phone, email, physician..."
+              placeholder="Search patient, phone, email, physician..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-lg text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#C5A880]/60"
@@ -264,7 +277,7 @@ export default function AdminDashboard() {
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
-                className={`px-3.5 py-1.5 rounded-md text-xs uppercase tracking-wider transition-all ${
+                className={`px-3.5 py-1.5 rounded-md text-xs uppercase tracking-wider transition-all cursor-pointer ${
                   filter === tab
                     ? "bg-[#C5A880] text-black font-semibold shadow-sm"
                     : "text-neutral-400 hover:text-white"
