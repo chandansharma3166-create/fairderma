@@ -40,7 +40,7 @@ export const metadata: Metadata = {
       "Physician-led dermatology specializing in picosecond lasers, exosome therapy, and facial sculpting.",
     images: [
       {
-        url: "/og-image.png",
+        url: "https://fairderma.vercel.app/og-image.png",
         width: 1200,
         height: 630,
         alt: "FairDerma Clinical Dermatology",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: "FairDerma® | Advanced Clinical Dermatology",
     description:
       "Physician-led dermatology specializing in picosecond lasers, exosome therapy, and facial sculpting.",
-    images: ["/og-image.png"],
+    images: ["https://fairderma.vercel.app/og-image.png"],
   },
 };
 
