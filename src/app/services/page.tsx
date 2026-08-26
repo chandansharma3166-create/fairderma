@@ -3,19 +3,19 @@ import Link from "next/link";
 import { TREATMENTS } from "@/data/treatments";
 import { ArrowLeft, Clock, ShieldCheck, CheckCircle2, Calendar } from "lucide-react";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
   return TREATMENTS.map((treatment) => ({
     slug: treatment.slug,
   }));
 }
 
-export default async function ServiceDetailPage({
-  params,
-}: {
-  params: Promise<{ slug: string }> | { slug: string };
-}) {
-  const resolvedParams = await Promise.resolve(params);
-  const treatment = TREATMENTS.find((t) => t.slug === resolvedParams?.slug);
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export default async function ServiceDetailPage({ params }: PageProps) {
+  const { slug } = await params;
+  const treatment = TREATMENTS.find((t) => t.slug === slug);
 
   if (!treatment) {
     notFound();
