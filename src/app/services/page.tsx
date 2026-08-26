@@ -1,67 +1,125 @@
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { TREATMENTS } from "@/data/treatments";
-import { ArrowRight, Clock, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, Clock, ShieldCheck, CheckCircle, Calendar } from "lucide-react";
 
-export default function ServicesPage() {
+export function generateStaticParams() {
+  return TREATMENTS.map((treatment) => ({
+    slug: treatment.slug,
+  }));
+}
+
+export default async function ServiceDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const resolvedParams = await params;
+  const treatment = TREATMENTS.find((t) => t.slug === resolvedParams.slug);
+
+  if (!treatment) {
+    notFound();
+  }
+
   return (
     <div className="min-h-screen bg-[#0d0f12] text-white py-20 px-6 lg:px-16">
-      <div className="max-w-6xl mx-auto space-y-16">
+      <div className="max-w-4xl mx-auto space-y-12">
         
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[#C5A880] text-xs font-mono tracking-widest uppercase">
-            <Sparkles className="w-3.5 h-3.5" />
-            Clinical Menu
-          </div>
-          <h1 className="text-4xl lg:text-5xl font-light tracking-tight text-white">
-            Targeted Dermatological Protocols
+        {/* Navigation */}
+        <Link
+          href="/services"
+          className="inline-flex items-center gap-2 text-xs font-mono uppercase text-neutral-400 hover:text-[#C5A880] transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Clinical Menu
+        </Link>
+
+        {/* Hero Section */}
+        <div className="space-y-4 border-b border-white/10 pb-8">
+          <span className="text-xs font-mono text-[#C5A880] uppercase tracking-widest">
+            {treatment.category}
+          </span>
+          <h1 className="text-3xl lg:text-5xl font-light text-white tracking-tight">
+            {treatment.title}
           </h1>
-          <p className="text-neutral-400 text-sm leading-relaxed">
-            Evidence-based medical aesthetics and precision skin therapies executed by certified physicians.
+          <p className="text-lg text-neutral-300 font-light leading-relaxed">
+            {treatment.description}
           </p>
+
+          <div className="flex flex-wrap gap-6 pt-4 text-xs font-mono text-neutral-400">
+            <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-md border border-white/10">
+              <Clock className="w-4 h-4 text-[#C5A880]" />
+              <span>Duration: {treatment.duration}</span>
+            </div>
+            <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-md border border-white/10">
+              <ShieldCheck className="w-4 h-4 text-[#C5A880]" />
+              <span>Downtime: {treatment.downtime}</span>
+            </div>
+          </div>
         </div>
 
-        {/* Treatment Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {TREATMENTS.map((item) => (
-            <div
-              key={item.slug}
-              className="bg-[#16161A] border border-white/10 rounded-2xl p-8 flex flex-col justify-between hover:border-[#C5A880]/50 transition-all group"
-            >
-              <div className="space-y-4">
-                <span className="text-xs font-mono text-[#C5A880] uppercase tracking-wider block">
-                  {item.category}
-                </span>
-                <h3 className="text-2xl font-light text-white group-hover:text-[#C5A880] transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-neutral-400 text-xs leading-relaxed">
-                  {item.tagline}
-                </p>
+        {/* Benefits & Indications */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-[#16161A] p-6 rounded-xl border border-white/10 space-y-4">
+            <h3 className="text-sm font-mono uppercase tracking-wider text-[#C5A880]">
+              Clinical Benefits
+            </h3>
+            <ul className="space-y-3 text-xs text-neutral-300">
+              {treatment.benefits.map((benefit, i) => (
+                <li key={i} className="flex items-start gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-                <div className="pt-4 border-t border-white/5 flex items-center gap-4 text-xs text-neutral-400">
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-neutral-500" />
-                    {item.duration}
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-neutral-500" />
-                    {item.downtime}
-                  </div>
-                </div>
-              </div>
+          <div className="bg-[#16161A] p-6 rounded-xl border border-white/10 space-y-4">
+            <h3 className="text-sm font-mono uppercase tracking-wider text-[#C5A880]">
+              Primary Indications
+            </h3>
+            <ul className="space-y-3 text-xs text-neutral-300">
+              {treatment.idealFor.map((indication, i) => (
+                <li key={i} className="flex items-center gap-2.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#C5A880]" />
+                  <span>{indication}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
-              <div className="pt-8">
-                <Link
-                  href={`/services/${item.slug}`}
-                  className="w-full inline-flex items-center justify-between px-4 py-3 rounded-lg bg-white/5 hover:bg-[#C5A880] hover:text-black text-xs font-semibold uppercase tracking-wider transition-all"
-                >
-                  <span>Explore Protocol</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+        {/* Protocol Steps */}
+        <div className="space-y-6">
+          <h3 className="text-sm font-mono uppercase tracking-wider text-[#C5A880]">
+            Clinical Workflow Protocol
+          </h3>
+          <div className="space-y-3">
+            {treatment.protocol.map((protocolStep, idx) => (
+              <div
+                key={idx}
+                className="p-5 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-2"
+              >
+                <div className="font-mono text-sm text-white">{protocolStep.step}</div>
+                <div className="text-xs text-neutral-400 max-w-md">{protocolStep.detail}</div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Booking CTA */}
+        <div className="p-8 rounded-2xl bg-[#C5A880] text-black flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <h3 className="text-xl font-bold">Ready for a Clinical Consultation?</h3>
+            <p className="text-xs text-black/80 mt-1">
+              Schedule a personalized 3D diagnostic evaluation with our physicians.
+            </p>
+          </div>
+          <Link
+            href="/#booking"
+            className="px-6 py-3.5 bg-black text-white font-semibold text-xs uppercase tracking-wider rounded-lg shrink-0 hover:bg-neutral-900 transition-colors flex items-center gap-2"
+          >
+            <Calendar className="w-4 h-4" /> Book Appointment
+          </Link>
         </div>
 
       </div>
