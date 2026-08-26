@@ -23,12 +23,6 @@ export default function Navbar() {
         {/* Desktop Links */}
         <nav className="hidden md:flex items-center gap-8">
           <Link
-            href="/services"
-            className="text-xs uppercase tracking-[0.2em] text-[#C5A880] hover:text-white transition-colors font-semibold"
-          >
-            Services Menu
-          </Link>
-          <Link
             href="/#services"
             className="text-xs uppercase tracking-[0.2em] text-neutral-400 hover:text-[#C5A880] transition-colors"
           >
@@ -53,7 +47,7 @@ export default function Navbar() {
           </Link>
 
           <a
-            href="/#booking"
+            href="/#consultation"
             className="flex items-center gap-2 px-5 py-2.5 bg-[#C5A880] text-black text-xs font-bold uppercase tracking-wider hover:bg-[#b39369] transition-colors rounded"
           >
             <span>Book Visit</span>
@@ -75,13 +69,6 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden bg-[#16161A] border-b border-white/10 px-6 py-6 flex flex-col gap-4">
           <Link
-            href="/services"
-            onClick={() => setIsOpen(false)}
-            className="text-sm uppercase tracking-widest text-[#C5A880] font-semibold"
-          >
-            Services Menu
-          </Link>
-          <Link
             href="/#services"
             onClick={() => setIsOpen(false)}
             className="text-sm uppercase tracking-widest text-neutral-300 hover:text-[#C5A880]"
@@ -95,10 +82,18 @@ export default function Navbar() {
           >
             Consultation
           </Link>
-          <a
-            href="/#booking"
+          <Link
+            href="/services"
             onClick={() => setIsOpen(false)}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-[#C5A880] text-black text-xs font-bold uppercase tracking-wider rounded mt-2"
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 text-[#C5A880] text-xs font-bold uppercase tracking-wider rounded mt-1"
+          >
+            <Stethoscope className="w-4 h-4" />
+            <span>View Catalog</span>
+          </Link>
+          <a
+            href="/#consultation"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-[#C5A880] text-black text-xs font-bold uppercase tracking-wider rounded mt-1"
           >
             <span>Book Visit</span>
             <ArrowUpRight className="w-4 h-4" />
