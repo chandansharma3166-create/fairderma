@@ -1,10 +1,10 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
 import { TREATMENTS } from "@/data/treatments";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://fairderma.vercel.app";
 
-  const treatmentRoutes = TREATMENTS.map((treatment) => ({
+  const treatmentUrls = TREATMENTS.map((treatment) => ({
     url: `${baseUrl}/services/${treatment.slug}`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,
@@ -24,6 +24,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
-    ...treatmentRoutes,
+    ...treatmentUrls,
   ];
 }

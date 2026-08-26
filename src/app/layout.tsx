@@ -16,23 +16,20 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL("https://fairderma.vercel.app"),
   title: {
-    default: "FairDerma® | Advanced Clinical Dermatology & Laser Center",
+    default: "FairDerma® | Advanced Clinical Dermatology",
     template: "%s | FairDerma®",
   },
   description:
-    "Architectural skin science and precision dermatology led by board-certified physicians. Specializing in picosecond lasers, exosome therapy, and facial sculpting.",
+    "Physician-led dermatology and laser center specializing in picosecond lasers, exosome therapy, and architectural facial sculpting.",
   keywords: [
     "Dermatology",
     "Clinical Aesthetics",
     "Picosecond Laser",
     "Facial Sculpting",
     "Exosome Therapy",
-    "Skin Rejuvenation",
     "FairDerma",
   ],
   authors: [{ name: "FairDerma Medical Group" }],
-  creator: "FairDerma Medical Group",
-  publisher: "FairDerma Clinical Aesthetics",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -40,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "FairDerma Clinic",
     title: "FairDerma® | Advanced Clinical Dermatology",
     description:
-      "Physician-led architectural skin science, cellular bio-stimulators, and precision dermal restructuring.",
+      "Physician-led dermatology specializing in picosecond lasers, exosome therapy, and facial sculpting.",
     images: [
       {
         url: "/og-image.png",
@@ -54,19 +51,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "FairDerma® | Advanced Clinical Dermatology",
     description:
-      "Physician-led architectural skin science, cellular bio-stimulators, and precision dermal restructuring.",
+      "Physician-led dermatology specializing in picosecond lasers, exosome therapy, and facial sculpting.",
     images: ["/og-image.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
   },
 };
 
