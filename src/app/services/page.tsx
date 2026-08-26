@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { TREATMENTS } from "@/data/treatments";
-import { ArrowLeft, Clock, ShieldCheck, CheckCircle, Calendar } from "lucide-react";
+import { ArrowLeft, Clock, ShieldCheck, CheckCircle2, Calendar } from "lucide-react";
 
 export function generateStaticParams() {
   return TREATMENTS.map((treatment) => ({
@@ -12,17 +12,17 @@ export function generateStaticParams() {
 export default async function ServiceDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }> | { slug: string };
 }) {
-  const resolvedParams = await params;
-  const treatment = TREATMENTS.find((t) => t.slug === resolvedParams.slug);
+  const resolvedParams = await Promise.resolve(params);
+  const treatment = TREATMENTS.find((t) => t.slug === resolvedParams?.slug);
 
   if (!treatment) {
     notFound();
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0f12] text-white py-20 px-6 lg:px-16">
+    <main className="min-h-screen bg-[#0d0f12] text-white py-12 px-6 lg:px-16">
       <div className="max-w-4xl mx-auto space-y-12">
         
         {/* Navigation */}
@@ -66,7 +66,7 @@ export default async function ServiceDetailPage({
             <ul className="space-y-3 text-xs text-neutral-300">
               {treatment.benefits.map((benefit, i) => (
                 <li key={i} className="flex items-start gap-2.5">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>{benefit}</span>
                 </li>
               ))}
@@ -115,7 +115,7 @@ export default async function ServiceDetailPage({
             </p>
           </div>
           <Link
-            href="/#booking"
+            href="/#consultation"
             className="px-6 py-3.5 bg-black text-white font-semibold text-xs uppercase tracking-wider rounded-lg shrink-0 hover:bg-neutral-900 transition-colors flex items-center gap-2"
           >
             <Calendar className="w-4 h-4" /> Book Appointment
@@ -123,6 +123,6 @@ export default async function ServiceDetailPage({
         </div>
 
       </div>
-    </div>
+    </main>
   );
 }
