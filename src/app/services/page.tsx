@@ -8,12 +8,11 @@ export default function ServicesPage() {
   return (
     <main className="min-h-screen bg-[#0d0f12] text-white py-12 px-6 lg:px-16">
       <div className="max-w-6xl mx-auto space-y-16">
-        
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[#C5A880] text-xs font-mono tracking-widest uppercase">
             <Sparkles className="w-3.5 h-3.5" />
-            Clinical Menu
+            Clinical Catalog
           </div>
           <h1 className="text-4xl lg:text-5xl font-light tracking-tight text-white">
             Targeted Dermatological Protocols
@@ -65,7 +64,6 @@ export default function ServicesPage() {
             </div>
           ))}
         </div>
-
       </div>
     </main>
   );
